@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Puissance 4 Dridri</title>
+	<link rel="shortcut icon" type="image/jpg" href="p.jpg">
+	<link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+
+</head>
+
+<style>
+
+	.container {
+		display: none;
+		font-family: 'Oswald', sans-serif;
+		width: 500px;
+		height: 500px;
+		background-color: #36BFB9;
+		position: absolute;
+		right: 10%;
+		border-radius: 50%;	
+	}
+
+	p{
+		font-size: 30px;
+		width: 100%;
+		text-align: center;
+		margin-top: 100px;
+	}
+
+	span{
+		position: absolute;
+		padding-top: 40px;
+		margin-left: -15px;
+		height: 100%;
+	}
+
+	.button {
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		position: relative;
+		border-radius: 10px;
+		width: 300px;
+		height: 200px;
+		display: flex;
+	}
+
+	.yes {
+		border-radius: 50%;
+		height: 100px;
+		width: 100px;
+		margin: auto;
+		background-color: white;
+		cursor: pointer;
+		text-align: center;
+		
+	}
+
+</style>
+
+<body>
+
+	<div class="container">
+		<p>Voulez vous refaire une partie ?????? </p>
+		<div class="button">
+			<div class=" oui yes"><span>OUI</span></div>
+			<div class="yes"><span>NON </span></div>
+		</div>
+	</div>
+
+	<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width=1000 height=1000 id="image">
+
+		<rect width="700" height="600" x="0" y="0" fill="#36BFB9" />
+
+	</svg>
+
+</body>
+
+<script src="http://code.jquery.com/jquery-3.1.1.js"></script>
+<script>
+	// boucle pour la grille en svg 
+	for (var i = 0; i < 42; i++) {
+		var x = 50 + i % 7 * 100;
+		var y = (50 + Math.floor(i / 7) * 100);
+
+		$("#image").append('<circle data-colonne="' + (i % 7) + '" data-ligne="' + (Math.floor(i / 7)) +
+			'" class="cercle" colonne="' + (i % 7) + '" cx="' + x + '" cy="' + y + '" r="45" fill="white" "></circle>');
+		console.log((Math.floor(i / 7)));
+		console.log((i % 7));
+	}
+
+	//particularité du svg avec jQuery: il faut "recharger" le svg après y avoir ajouté des éléments
+	$("#image").html($("#image").html());
+
+	// alternance de couleurs
+	var joueur = 0;
+
+	$("#image").html($("#image").html()); // quand on click sur un cercle 
+	$("circle").click(function () {
+
+		var c = $(this).attr("data-colonne");
+		var t = parseInt(c); // la variable c devient un nombre grace au parseInt
+		for (var l = 6; l >= 0; l--) {
+
+			var cell = $('[data-colonne="' + t + '"][data-ligne="' + l + '"]');
+			if (cell.attr("fill") == "white") {
+				if (joueur == 0) {
+					console.log("click"); // remplir avec la couleur jaune 
+					cell.attr("fill", "yellow");
+
+				} else {
+					console.log("click"); // sinon, avec la couleur rouge 
+					cell.attr("fill", "red");
+				}
+
+				// message c gagné 
+				if (win(t, l)) {  
+					console.log(win(t, l));
+					alert("EHHHH C GAGNE ... BRAVO T TROP FORT !!!");
+					$(".container").show("linear");
+				}
+				// permet de selectionner tous les cercles de couleurs blanc 
+				// permet de savoir qi il y a une égalité
+				else if ( $('circle[fill = "white"]').length ==0){ // si il y a égalité, alors il affiche la div container pour relancer une partie 
+					$(".container").show("");
+				}
+
+				break; // permet de sortir d'une boucle 
+			}
+		}
+		// Changement de joueur 
+		joueur = 1 - joueur;
+		console.log(joueur);
+	})
+	$(".oui").click(function(){ 
+		$("circle").attr("fill" , "white"); // relance tout en cachant la fenetre 
+		$(".container").hide("");
+	})
+	$(".yes").click(function(){
+		$(".container").hide(""); // cache la fenetre container 
+	})
+
+	/* Fonction qui permet de vérifier en haut, en bas, a gauche, a droite et en diagonale */
+
+	function win(x, y) { // vérifie en diagonale, gauche, droite, haut et bas 
+		if (verif(x, y, 1, 0) + verif(x, y, -1, 0) + 1 >= 4) {
+			return true;
+		} else if (verif(x, y, 1, 1) + verif(x, y, -1, -1) + 1 >= 4) {
+			return true;
+		} else if (verif(x, y, 1, -1) + verif(x, y, -1, 1) + 1 >= 4) {
+			return true;
+		} else if (verif(x, y, 0, 1) + 1 >= 4) {
+			return true; // si toutes les conditions sont remplies = c'est validé
+		} else {
+			return false;
+		}
+	}
+
+	function verif(x, y, cx, cy) {
+		if ((x == 0 && cx == -1) || (x == 6 && cx == 1) || (y == 0 && cy == -1) || (y == 5 && cy == 1)) {
+			return 0;
+		} else if ($("[data-colonne=" + x + "][data-ligne=" + y + "]").attr("fill") != $("[data-colonne=" + (x + cx) +
+				"][data-ligne=" + (y + cy) + "]").attr("fill")) {
+			return 0;
+		} else {
+			console.log(cx + " " + cy)
+			return verif(x + cx, y + cy, cx, cy) + 1;
+		}
+	}
+</script>
+</html>
